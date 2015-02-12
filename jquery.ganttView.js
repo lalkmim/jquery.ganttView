@@ -171,7 +171,7 @@ behavior: {
             var totalW = 0;
 			for (var y in dates) {
 				for (var m in dates[y]) {
-					var w = dates[y][m].length * (24/opts.hoursBlockSize) * cellWidth;
+					var w = dates[y][m].length * K * cellWidth;
 					totalW = totalW + w;
 					monthsDiv.append(jQuery("<div>", {
 						"class": "ganttview-hzheader-month",
@@ -181,11 +181,11 @@ behavior: {
 						daysDiv.append(jQuery("<div>", { 
 						    "class": "ganttview-hzheader-day",
 						    "css": {
-						        "width": opts.cellWidth * (24/opts.hoursBlockSize) - 1
+						        "width": opts.cellWidth * K - 1
 						    }
 						}).append(dates[y][m][d].getDate()));
 					
-						for (var k=0; k<(24/opts.hoursBlockSize); k++) {
+						for (var k=0; k<K; k++) {
     						hoursDiv.append(jQuery("<div>", {
     						    "class": "ganttview-hzheader-hour"
     						}).append(k*opts.hoursBlockSize));
