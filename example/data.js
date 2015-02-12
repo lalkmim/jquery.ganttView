@@ -1,8 +1,8 @@
 var ganttData = [
 	{
 		id: 1, name: "Feature 1", series: [
-			{ name: "Planned", start: new Date(2010,00,01), end: new Date(2010,00,03) },
-			{ name: "Actual", start: new Date(2010,00,02), end: new Date(2010,00,05), color: "#f0f0f0" }
+			{ name: "Planned", start: new Date(2010,00,01,8,15,0), end: new Date(2010,00,03,4,0,0) },
+			{ name: "Actual", start: new Date(2010,00,02,16,0,0), end: new Date(2010,00,05,0,0,0), color: "#f0f0f0" }
 		]
 	}, 
 	{
@@ -26,8 +26,8 @@ var ganttData = [
 	},
 	{
 		id: 5, name: "Feature 5", series: [
-			{ name: "Planned", start: new Date(2010,02,01), end: new Date(2010,03,20) },
-			{ name: "Actual", start: new Date(2010,02,01), end: new Date(2010,03,26), color: "#f0f0f0" }
+			{ name: "Planned", start: new Date(2010,00,01), end: new Date(2010,00,20) },
+			{ name: "Actual", start: new Date(2010,00,01), end: new Date(2010,00,26), color: "#f0f0f0" }
 		]
 	}, 
 	{
@@ -36,7 +36,7 @@ var ganttData = [
 			{ name: "Actual", start: new Date(2010,00,06), end: new Date(2010,00,17), color: "#f0f0f0" },
 			{ name: "Projected", start: new Date(2010,00,06), end: new Date(2010,00,20), color: "#e0e0e0" }
 		]
-	}, 
+	} /*, 
 	{
 		id: 7, name: "Feature 7", series: [
 			{ name: "Planned", start: new Date(2010,00,11), end: new Date(2010,01,03) }
@@ -47,5 +47,5 @@ var ganttData = [
 			{ name: "Planned", start: new Date(2010,01,01), end: new Date(2010,01,03) },
 			{ name: "Actual", start: new Date(2010,01,01), end: new Date(2010,01,05), color: "#f0f0f0" }
 		]
-	}
+	} */
 ];

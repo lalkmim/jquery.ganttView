@@ -47,6 +47,7 @@ behavior: {
             cellHeight: 31,
             slideWidth: 400,
             vHeaderWidth: 100,
+            hoursBlockSize: 24,
             behavior: {
             	clickable: true,
             	draggable: true,
@@ -64,7 +65,7 @@ behavior: {
 
 		function build() {
 			
-			var minDays = Math.floor((opts.slideWidth / opts.cellWidth)  + 5);
+			var minDays = Math.floor(opts.slideWidth/opts.cellWidth) - 1;
 			var startEnd = DateUtils.getBoundaryDatesFromData(opts.data, minDays);
 			opts.start = startEnd[0];
 			opts.end = startEnd[1];
@@ -98,6 +99,7 @@ behavior: {
 	}
 
 	var Chart = function(div, opts) {
+	    var K = (24/opts.hoursBlockSize);
 		
 		function render() {
 			addVtHeader(div, opts.data, opts.cellHeight);
@@ -138,7 +140,12 @@ behavior: {
         }
 
         function addVtHeader(div, data, cellHeight) {
-            var headerDiv = jQuery("<div>", { "class": "ganttview-vtheader" });
+            var headerDiv = jQuery("<div>", {
+                "class": "ganttview-vtheader",
+                "css": {
+                    "margin-top": (opts.hoursBlockSize < 24 ? 62 : 41)
+                }
+            });
             for (var i = 0; i < data.length; i++) {
                 var itemDiv = jQuery("<div>", { "class": "ganttview-vtheader-item" });
                 itemDiv.append(jQuery("<div>", {
@@ -160,24 +167,39 @@ behavior: {
             var headerDiv = jQuery("<div>", { "class": "ganttview-hzheader" });
             var monthsDiv = jQuery("<div>", { "class": "ganttview-hzheader-months" });
             var daysDiv = jQuery("<div>", { "class": "ganttview-hzheader-days" });
+            var hoursDiv = jQuery("<div>", { "class": "ganttview-hzheader-hours" });
             var totalW = 0;
 			for (var y in dates) {
 				for (var m in dates[y]) {
-					var w = dates[y][m].length * cellWidth;
+					var w = dates[y][m].length * (24/opts.hoursBlockSize) * cellWidth;
 					totalW = totalW + w;
 					monthsDiv.append(jQuery("<div>", {
 						"class": "ganttview-hzheader-month",
 						"css": { "width": (w - 1) + "px" }
 					}).append(monthNames[m] + "/" + y));
 					for (var d in dates[y][m]) {
-						daysDiv.append(jQuery("<div>", { "class": "ganttview-hzheader-day" })
-							.append(dates[y][m][d].getDate()));
-					}
+						daysDiv.append(jQuery("<div>", { 
+						    "class": "ganttview-hzheader-day",
+						    "css": {
+						        "width": opts.cellWidth * (24/opts.hoursBlockSize) - 1
+						    }
+						}).append(dates[y][m][d].getDate()));
+					
+						for (var k=0; k<(24/opts.hoursBlockSize); k++) {
+    						hoursDiv.append(jQuery("<div>", {
+    						    "class": "ganttview-hzheader-hour"
+    						}).append(k*opts.hoursBlockSize));
+    					}
+				    }
 				}
 			}
             monthsDiv.css("width", totalW + "px");
             daysDiv.css("width", totalW + "px");
+            hoursDiv.css("width", totalW + "px");
             headerDiv.append(monthsDiv).append(daysDiv);
+            if(opts.hoursBlockSize < 24) {
+                headerDiv.append(hoursDiv);
+            }
             div.append(headerDiv);
         }
 
@@ -187,11 +209,13 @@ behavior: {
 			for (var y in dates) {
 				for (var m in dates[y]) {
 					for (var d in dates[y][m]) {
-						var cellDiv = jQuery("<div>", { "class": "ganttview-grid-row-cell" });
-						if (DateUtils.isWeekend(dates[y][m][d]) && showWeekends) { 
-							cellDiv.addClass("ganttview-weekend"); 
-						}
-						rowDiv.append(cellDiv);
+					    for(var i=0; i<K; i++) {
+    						var cellDiv = jQuery("<div>", { "class": "ganttview-grid-row-cell" });
+    						if (DateUtils.isWeekend(dates[y][m][d]) && showWeekends) { 
+    							cellDiv.addClass("ganttview-weekend"); 
+    						}
+    						rowDiv.append(cellDiv);
+					    }
 					}
 				}
 			}
@@ -207,7 +231,12 @@ behavior: {
         }
 
         function addBlockContainers(div, data) {
-            var blocksDiv = jQuery("<div>", { "class": "ganttview-blocks" });
+            var blocksDiv = jQuery("<div>", {
+                "class": "ganttview-blocks",
+                "css": {
+                    "margin-top": (opts.hoursBlockSize < 24 ? 61 : 40)
+                }
+            });
             for (var i = 0; i < data.length; i++) {
                 for (var j = 0; j < data[i].series.length; j++) {
                     blocksDiv.append(jQuery("<div>", { "class": "ganttview-block-container" }));
@@ -222,21 +251,22 @@ behavior: {
             for (var i = 0; i < data.length; i++) {
                 for (var j = 0; j < data[i].series.length; j++) {
                     var series = data[i].series[j];
-                    var size = DateUtils.daysBetween(series.start, series.end) + 1;
-					var offset = DateUtils.daysBetween(start, series.start);
+                    var size = DateUtils.hoursBetween(series.start, series.end) * K / 24;
+					var offset = DateUtils.hoursBetween(start, series.start) * K / 24;
+					var duration = zeros(parseInt((size/K)*24, 10), 2) + ":" + zeros((size/K)*24*60 % 60, 2);
 					var block = jQuery("<div>", {
                         "class": "ganttview-block",
-                        "title": series.name + ", " + size + " days",
+                        "title": series.name + ", " + duration,
                         "css": {
-                            "width": ((size * cellWidth) - 9) + "px",
-                            "margin-left": ((offset * cellWidth) + 3) + "px"
+                            "width": ((size * cellWidth) - 3) + "px",
+                            "margin-left": ((offset * cellWidth)) + "px"
                         }
                     });
                     addBlockData(block, data[i], series);
                     if (data[i].series[j].color) {
                         block.css("background-color", data[i].series[j].color);
                     }
-                    block.append(jQuery("<div>", { "class": "ganttview-block-text" }).text(size));
+                    block.append(jQuery("<div>", { "class": "ganttview-block-text" }).text(duration));
                     jQuery(rows[rowIdx]).append(block);
                     rowIdx = rowIdx + 1;
                 }
@@ -255,6 +285,14 @@ behavior: {
             jQuery("div.ganttview-grid-row div.ganttview-grid-row-cell:last-child", div).addClass("last");
             jQuery("div.ganttview-hzheader-days div.ganttview-hzheader-day:last-child", div).addClass("last");
             jQuery("div.ganttview-hzheader-months div.ganttview-hzheader-month:last-child", div).addClass("last");
+        }
+        
+        function zeros(val, size) {
+            var txt = val + '';
+            while(txt.length < size) {
+                txt = '0' + txt;
+            }
+            return txt;
         }
 		
 		return {
@@ -354,6 +392,13 @@ behavior: {
             var count = 0, date = start.clone();
             while (date.compareTo(end) == -1) { count = count + 1; date.addDays(1); }
             return count;
+        },
+        
+        hoursBetween: function (start, end) {
+            if (!start || !end) { return 0; }
+            start = Date.parse(start); end = Date.parse(end);
+            if (start.getYear() == 1901 || end.getYear() == 8099) { return 0; }
+            return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
         },
         
         isWeekend: function (date) {
