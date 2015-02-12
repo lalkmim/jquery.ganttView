@@ -66,6 +66,9 @@ behavior: {
 		function build() {
 			
 			var minDays = Math.floor(opts.slideWidth/opts.cellWidth) - 1;
+			if(opts.hoursBlockSize < 24) {
+			    minDays = minDays / (24/opts.hoursBlockSize);
+			}
 			var startEnd = DateUtils.getBoundaryDatesFromData(opts.data, minDays);
 			opts.start = startEnd[0];
 			opts.end = startEnd[1];
@@ -253,7 +256,7 @@ behavior: {
                     var series = data[i].series[j];
                     var size = DateUtils.hoursBetween(series.start, series.end) * K / 24;
 					var offset = DateUtils.hoursBetween(start, series.start) * K / 24;
-					var duration = zeros(parseInt((size/K)*24, 10), 2) + ":" + zeros((size/K)*24*60 % 60, 2);
+					var duration = zeros(parseInt((size/K)*24, 10), 2) + ":" + zeros(parseInt((size/K)*24*60 % 60, 10), 2);
 					var block = jQuery("<div>", {
                         "class": "ganttview-block",
                         "title": series.name + ", " + duration,
